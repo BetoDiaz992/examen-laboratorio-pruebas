@@ -1,0 +1,48 @@
+@model dynamic
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<!-- LOGIN OVERLAY -->
+<section class="fixed inset-0 z-[100] flex items-center justify-center bg-[#161616] p-4 transition-opacity duration-500" id="login-screen">
+    <div class="grid md:grid-cols-2 w-full max-w-5xl bg-surface overflow-hidden shadow-2xl rounded-2xl">
+        <div class="p-12 flex flex-col justify-center bg-white">
+            <div class="flex items-center gap-2 mb-12">
+                <span class="material-symbols-outlined text-primary text-3xl">pets</span>
+                <span class="text-2xl font-bold tracking-tight text-on-background">VetCorp</span>
+            </div>
+            <h1 class="text-3xl font-light mb-2 text-on-surface">Bienvenido</h1>
+            <p class="text-secondary mb-8">Gestión veterinaria de alto rendimiento.</p>
+
+            <form asp-controller="Account" asp-action="Login" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+                <div class="space-y-6">
+                    <!-- Validation Summary -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="p-4 bg-error-container border-l-4 border-error text-on-error-container text-xs rounded-md">
+                            <div asp-validation-summary="ModelOnly"></div>
+                        </div>
+                    }
+
+                    <div class="border-b border-outline-variant bg-surface-container p-4 rounded-lg">
+                        <label class="block text-xs text-on-surface-variant mb-1 font-semibold">Correo electrónico</label>
+                        <input class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm" name="email" type="email" placeholder="admin@petclinic.com" required value="admin@petclinic.com" />
+                    </div>
+                    <div class="border-b border-outline-variant bg-surface-container p-4 rounded-lg">
+                        <label class="block text-xs text-on-surface-variant mb-1 font-semibold">Contraseña</label>
+                        <input class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm" name="password" type="password" placeholder="••••••••" required value="ClinicAdminSecurePass10!" />
+                    </div>
+                    <button type="submit" class="w-full h-12 bg-primary text-on-primary flex items-center justify-between px-6 rounded-lg hover:brightness-110 hover:shadow-lg active:scale-[0.98] transition-all duration-200">
+                        <span class="font-semibold text-sm">Ingresar</span>
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="hidden md:block relative">
+            <img alt="Clinic" class="absolute inset-0 w-full h-full object-cover grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_NfV69q6GJH_Tp3iWVpG_OWvi9g9Qbpwml2aAYmaxEpZIxeycQaWS4Z991aUvRwYYMRRU_lRkzWTtFBK0gBJUjEhPiI4e6kou--UpUUQ5WGx79Z-Gu19wjmCiu_Sb7zJrLmW3qgaJUkgdw5gWHeeOQSpsON-5Q0vE5tgZwayVfwmbz-nxRuaE00ElKIfv55JsjQvCLOTBFXo-3hQjzGxEpKGnWszNQb9symtJL9FMybguU727T9avyU5oj6kNdp5HH757Pee43lKA" />
+            <div class="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+        </div>
+    </div>
+</section>

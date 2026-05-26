@@ -1,0 +1,41 @@
+## Ignore Visual Studio temporary files, build results, and user settings
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Re]leasePublic/
+x64/
+x86/
+build/
+bld/
+[Bin]
+[Obj]
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# MSTest test Results
+[T]est[R]esult*/
+[Bb]uild[L]og.*
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# Visual Studio 2017/2019/2022 cache directories
+.vs/
+TestResults/

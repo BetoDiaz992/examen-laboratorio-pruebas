@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PetClinic.Domain/PetClinic.Domain.csproj" />
+  <Project Path="PetClinic.Infraestructure/PetClinic.Infraestructure.csproj" />
+  <Project Path="PetClinic.Test/PetClinic.Test.csproj" />
+  <Project Path="PetClinic.Web/PetClinic.Web.csproj" />
+</Solution>

@@ -1,0 +1,312 @@
+@using PetClinic.Domain.Entities
+@using PetClinic.Domain.Enums
+@model List<Appointment>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Gestión de Citas";
+    var pets = ViewBag.Pets as List<Pet> ?? new List<Pet>();
+    var veterinarians = ViewBag.Veterinarians as List<Veterinarian> ?? new List<Veterinarian>();
+}
+
+<!-- Page Header -->
+<div class="px-8 py-8 border-b border-outline-variant">
+    <div class="flex justify-between items-end">
+        <div>
+            <nav class="flex gap-2 text-xs text-secondary mb-2">
+                <span class="">VetCorp</span>
+                <span class="">/</span>
+                <span class="text-primary font-semibold">Citas</span>
+            </nav>
+            <h2 class="text-3xl font-light text-on-surface">Gestión de Citas Médicas <span class="font-bold">(Año 2026)</span></h2>
+        </div>
+        <div class="flex gap-2">
+            <!-- REQ-CIT-04: Acción Prominente de Registro -->
+            <button class="px-4 py-2 bg-primary text-on-primary text-sm flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-md" onclick="toggleModal(true)">
+                <span class="material-symbols-outlined text-lg">add</span>
+                Añadir Cita
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Alert notifications for Success / Error messages -->
+@if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null)
+{
+    <div class="px-8 py-4 bg-surface-container-low border-b border-outline-variant">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="p-4 bg-tertiary-container border-l-4 border-tertiary text-on-tertiary-fixed-variant flex items-center gap-3 text-sm">
+                <span class="material-symbols-outlined text-xl">check_circle</span>
+                <span>@TempData["SuccessMessage"]</span>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="p-4 bg-error-container border-l-4 border-error text-on-error-container flex items-center gap-3 text-sm">
+                <span class="material-symbols-outlined text-xl">error</span>
+                <span class="font-semibold">@TempData["ErrorMessage"]</span>
+            </div>
+        }
+    </div>
+}
+
+<!-- Tab Selectors (REQ-CIT-05) -->
+<div class="px-8 border-b border-outline-variant bg-surface-container-low flex justify-between items-center h-12">
+    <div class="flex h-full">
+        <button class="px-6 h-full flex items-center gap-2 border-b-2 border-primary text-primary font-semibold text-sm transition-all focus:outline-none" id="btn-list" onclick="switchView('list')">
+            <span class="material-symbols-outlined text-lg">format_list_bulleted</span>
+            Vista de Lista
+        </button>
+        <button class="px-6 h-full flex items-center gap-2 border-b-2 border-transparent text-secondary hover:bg-surface-container-high text-sm transition-all focus:outline-none" id="btn-grid" onclick="switchView('grid')">
+            <span class="material-symbols-outlined text-lg">grid_view</span>
+            Vista de Cuadrícula
+        </button>
+    </div>
+    <div class="flex items-center gap-4 text-xs text-secondary font-semibold">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-tertiary"></span> Completado</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-primary"></span> Programada</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span> Cancelada</span>
+    </div>
+</div>
+
+<!-- View Containers -->
+<div class="p-8 flex-1">
+    <!-- REQ-CIT-05: VISTA DE LISTA (Tabla estructurada) -->
+    <div class="block" id="view-list">
+        <div class="overflow-hidden border border-outline-variant bg-white">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-surface-container-high text-[12px] font-semibold text-on-surface uppercase tracking-wider">
+                    <tr>
+                        <th class="px-4 py-3 border-b border-outline-variant">Mascota</th>
+                        <th class="px-4 py-3 border-b border-outline-variant">Veterinario</th>
+                        <th class="px-4 py-3 border-b border-outline-variant">Fecha / Hora</th>
+                        <th class="px-4 py-3 border-b border-outline-variant">Motivo</th>
+                        <th class="px-4 py-3 border-b border-outline-variant">Estado</th>
+                        <th class="px-4 py-3 border-b border-outline-variant text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm font-body divide-y divide-outline-variant">
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-secondary">
+                                <span class="material-symbols-outlined text-3xl mb-2 block">event_busy</span>
+                                No hay citas registradas en el sistema.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var app in Model.OrderBy(a => a.ScheduledTime))
+                        {
+                            <tr class="zebra-row hover:bg-primary-container/20 transition-colors">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full @(app.State == AppointmentStatus.Completada ? "bg-secondary-container text-secondary" : app.State == AppointmentStatus.Cancelada ? "bg-error-container text-error" : "bg-primary-container text-primary") flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-lg">pets</span>
+                                        </div>
+                                        <div>
+                                            <span class="font-semibold">@(app.Pet?.Name ?? "Paciente")</span>
+                                            <span class="text-xs text-secondary block">(@(app.Pet?.Species ?? "Especie"))</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 text-on-surface-variant font-medium">
+                                    @(app.Veterinarian?.Name ?? "Dr. Asignado")
+                                </td>
+                                <td class="px-4 py-4 font-mono text-xs">
+                                    <div class="font-bold">@app.ScheduledTime.ToString("dd MMM yyyy")</div>
+                                    <div class="text-secondary">@app.ScheduledTime.ToString("hh:mm tt")</div>
+                                </td>
+                                <td class="px-4 py-4 text-on-surface-variant italic max-w-xs truncate" title="@app.Reason">
+                                    @(string.IsNullOrEmpty(app.Reason) ? "- Sin motivo -" : app.Reason)
+                                </td>
+                                <td class="px-4 py-4">
+                                    @if (app.State == AppointmentStatus.Programada)
+                                    {
+                                        <span class="px-2 py-1 bg-primary-container text-on-primary-fixed-variant text-[11px] font-bold uppercase">Programada</span>
+                                    }
+                                    else if (app.State == AppointmentStatus.Completada)
+                                    {
+                                        <span class="px-2 py-1 bg-secondary-container text-on-secondary-fixed-variant text-[11px] font-bold uppercase">Completada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="px-2 py-1 bg-error-container text-on-error-container text-[11px] font-bold uppercase">Cancelada</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-4 text-right">
+                                    <div class="flex justify-end gap-2 items-center">
+                                        @if (app.State == AppointmentStatus.Programada)
+                                        {
+                                            <!-- Complete Action Form -->
+                                            <form asp-action="Complete" method="post" class="inline-flex gap-1.5 items-center">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <input type="text" name="notes" placeholder="Notas..." required class="px-2 py-1 border border-outline bg-surface-container text-xs w-28 focus:ring-1 focus:ring-primary focus:border-primary" />
+                                                <button type="submit" class="px-2.5 py-1 bg-tertiary text-on-tertiary text-xs hover:brightness-110 transition-all font-semibold" title="Completar Cita">Completar</button>
+                                            </form>
+
+                                            <!-- Cancel Action Form -->
+                                            <form asp-action="Cancel" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@app.Id" />
+                                                <button type="submit" class="px-2.5 py-1 bg-error text-on-error text-xs hover:brightness-110 transition-all font-semibold" title="Cancelar Cita" onclick="return confirm('¿Está seguro de que desea cancelar esta cita?')">Cancelar</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- REQ-CIT-05: VISTA DE CUADRÍCULA (Calendario Semanal) -->
+    <div class="hidden" id="view-grid">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-0 border border-outline-variant bg-outline-variant overflow-hidden">
+            @{
+                var daysOfWeek = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
+                var dayNames = new[] { "Lunes", "Martes", "Miércoles", "Jueves", "Viernes" };
+            }
+
+            @for (int i = 0; i < 5; i++)
+            {
+                var dayOfWeek = daysOfWeek[i];
+                var dayName = dayNames[i];
+                var dailyApps = Model.Where(a => a.ScheduledTime.DayOfWeek == dayOfWeek && a.State != AppointmentStatus.Cancelada).ToList();
+
+                <div class="bg-surface p-4 min-h-[500px] flex flex-col border-r border-outline-variant last:border-r-0">
+                    <h4 class="text-xs font-bold text-secondary uppercase tracking-widest mb-6">@dayName</h4>
+                    <div class="space-y-4 flex-1">
+                        @if (!dailyApps.Any())
+                        {
+                            <div class="h-20 border-2 border-dashed border-outline-variant flex items-center justify-center opacity-40">
+                                <span class="text-[10px] uppercase font-bold">Disponible</span>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var app in dailyApps.OrderBy(a => a.ScheduledTime))
+                            {
+                                <div class="p-3 border-l-4 shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200 @(app.State == AppointmentStatus.Completada ? "bg-secondary-container/40 border-secondary text-on-secondary-fixed-variant" : "bg-primary-container/40 border-primary text-on-primary-fixed-variant")">
+                                    <p class="text-[10px] font-bold text-secondary">@app.ScheduledTime.ToString("hh:mm tt")</p>
+                                    <p class="text-sm font-semibold mt-1">@(app.Pet?.Name ?? "Paciente")</p>
+                                    <p class="text-xs text-on-surface-variant mt-1">Vet: @(app.Veterinarian?.Name ?? "Dr. Asignado")</p>
+                                    @if (!string.IsNullOrEmpty(app.Reason))
+                                    {
+                                        <p class="text-[11px] italic mt-2 border-t border-outline-variant/30 pt-1.5 truncate">@app.Reason</p>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- REQ-CIT-01: ADD APPOINTMENT MODAL (Con validación interactiva de dependencias) -->
+<div class="fixed inset-0 z-[110] hidden bg-on-surface/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" id="appointment-modal">
+    <div class="bg-surface w-full max-w-xl shadow-xl transition-all scale-95 opacity-0 duration-300 border border-outline-variant" id="modal-content">
+        <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+            <h3 class="text-xl font-light">Nueva <span class="font-bold text-primary">Cita Médica</span></h3>
+            <button class="material-symbols-outlined text-secondary hover:text-on-surface p-1 hover:bg-surface-variant transition-colors" onclick="toggleModal(false)">close</button>
+        </div>
+        <form asp-controller="Appointments" asp-action="Create" method="post">
+            <div class="p-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="block text-xs font-semibold text-secondary uppercase">Mascota</label>
+                        <select name="petId" required class="w-full bg-surface-container border-none border-b border-outline h-10 px-3 text-sm focus:ring-2 focus:ring-primary">
+                            <option value="">Seleccionar Mascota...</option>
+                            @foreach (var pet in pets)
+                            {
+                                <option value="@pet.Id">@pet.Name (@pet.Species)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-semibold text-secondary uppercase">Veterinario</label>
+                        <select name="veterinarianId" required class="w-full bg-surface-container border-none border-b border-outline h-10 px-3 text-sm focus:ring-2 focus:ring-primary">
+                            <option value="">Seleccionar Médico...</option>
+                            @foreach (var vet in veterinarians)
+                            {
+                                <option value="@vet.Id">@vet.Name (@vet.Specialty)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-secondary uppercase">Fecha y Hora</label>
+                    <input name="scheduledTime" type="datetime-local" required class="w-full bg-surface-container border-none border-b border-outline h-10 px-3 text-sm focus:ring-2 focus:ring-primary" />
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-semibold text-secondary uppercase">Motivo de Consulta</label>
+                    <textarea name="reason" required placeholder="Describa el motivo de la visita..." rows="3" class="w-full bg-surface-container border-none border-b border-outline p-3 text-sm focus:ring-2 focus:ring-primary resize-none"></textarea>
+                </div>
+            </div>
+            <div class="p-6 bg-surface-container-low flex justify-end gap-3 border-t border-outline-variant">
+                <button type="button" class="px-8 py-3 bg-surface text-secondary border border-outline-variant hover:bg-surface-variant font-semibold transition-all" onclick="toggleModal(false)">Cancelar</button>
+                <button type="submit" class="px-8 py-3 bg-primary text-on-primary font-semibold hover:brightness-110 active:opacity-80 transition-all shadow-md">Confirmar Registro</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Toggle Views (REQ-CIT-05)
+        function switchView(view) {
+            const list = document.getElementById('view-list');
+            const grid = document.getElementById('view-grid');
+            const btnList = document.getElementById('btn-list');
+            const btnGrid = document.getElementById('btn-grid');
+
+            if (view === 'list') {
+                list.classList.remove('hidden');
+                grid.classList.add('hidden');
+                btnList.classList.add('border-primary', 'text-primary');
+                btnList.classList.remove('border-transparent', 'text-secondary');
+                btnGrid.classList.remove('border-primary', 'text-primary');
+                btnGrid.classList.add('border-transparent', 'text-secondary');
+            } else {
+                list.classList.add('hidden');
+                grid.classList.remove('hidden');
+                btnGrid.classList.add('border-primary', 'text-primary');
+                btnGrid.classList.remove('border-transparent', 'text-secondary');
+                btnList.classList.remove('border-primary', 'text-primary');
+                btnList.classList.add('border-transparent', 'text-secondary');
+            }
+        }
+
+        // Modal Toggle (REQ-CIT-04)
+        function toggleModal(show) {
+            const modal = document.getElementById('appointment-modal');
+            const content = document.getElementById('modal-content');
+            
+            if (show) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    content.classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            } else {
+                content.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // Micro-interactions for Table Rows
+        document.querySelectorAll('.zebra-row').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('ring-2', 'ring-primary-container', 'relative', 'z-10');
+                setTimeout(() => {
+                    row.classList.remove('ring-2', 'ring-primary-container', 'relative', 'z-10');
+                }, 400);
+            });
+        });
+    </script>
+}

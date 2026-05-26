@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - VetCorp Management</title>
+    <!-- Tailwind CSS (Directamente desde Stitch) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@@100..700,0..1&display=swap" rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#f4f4f4",
+                        "on-secondary-container": "#525252",
+                        "error-container": "#fff1f1",
+                        "outline-variant": "#e0e0e0",
+                        "surface": "#ffffff",
+                        "secondary-fixed-dim": "#c6c6c6",
+                        "on-tertiary-fixed-variant": "#044317",
+                        "on-primary-fixed-variant": "#0043ce",
+                        "on-tertiary-container": "#044317",
+                        "on-primary-container": "#161616",
+                        "inverse-primary": "#78a9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#e0e0e0",
+                        "on-secondary-fixed-variant": "#525252",
+                        "primary-fixed-dim": "#78a9ff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#e0e0e0",
+                        "surface-variant": "#f4f4f4",
+                        "inverse-surface": "#393939",
+                        "tertiary-fixed-dim": "#42be65",
+                        "on-tertiary": "#ffffff",
+                        "background": "#ffffff",
+                        "on-error-container": "#750e13",
+                        "surface-container-highest": "#c6c6c6",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f4f4f4",
+                        "on-primary-fixed": "#001d6c",
+                        "on-surface-variant": "#525252",
+                        "on-surface": "#161616",
+                        "on-secondary-fixed": "#161616",
+                        "primary": "#0f62fe",
+                        "outline": "#8d8d8d",
+                        "primary-container": "#d0e2ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e0e0e0",
+                        "tertiary-container": "#a7f0ba",
+                        "surface-bright": "#ffffff",
+                        "secondary": "#6f6f6f",
+                        "on-tertiary-fixed": "#022d0d",
+                        "surface-tint": "#0f62fe",
+                        "primary-fixed": "#d0e2ff",
+                        "surface-container-low": "#f4f4f4",
+                        "tertiary-fixed": "#a7f0ba",
+                        "error": "#da1e28",
+                        "tertiary": "#198038",
+                        "on-background": "#161616",
+                        "surface-dim": "#e0e0e0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["IBM Plex Sans", "sans-serif"],
+                        "display": ["IBM Plex Sans", "sans-serif"],
+                        "body": ["IBM Plex Sans", "sans-serif"],
+                        "label": ["IBM Plex Sans", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'IBM Plex Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+        .zebra-row:nth-child(even) { background-color: #f4f4f4; }
+        .transition-all-200 { transition: all 200ms cubic-bezier(0.2, 0, 0.38, 0.9); }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="bg-background text-on-surface selection:bg-primary-container overflow-x-hidden">
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <!-- MAIN APP WRAPPER FOR AUTHENTICATED USERS -->
+        <div class="h-screen flex flex-col" id="app-shell">
+            <!-- TopAppBar / Ribbon Menu (REQ-NAV-01) -->
+            <header class="bg-surface border-b border-outline-variant w-full z-40 shadow-sm">
+                <div class="flex justify-between items-center w-full px-6 h-14">
+                    <div class="flex items-center gap-10">
+                        <div class="text-xl font-bold text-primary flex items-center gap-2">
+                            <span class="material-symbols-outlined text-2xl">pets</span>
+                            <span>VetCorp Management</span>
+                        </div>
+                        <!-- Ribbon Menu (REQ-NAV-01) -->
+                        <nav class="hidden md:flex gap-8 h-full items-center font-body text-[14px]">
+                            <a class="text-secondary hover:bg-surface-variant transition-all px-2 py-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "text-primary border-b-2 border-primary font-semibold" : "")" asp-controller="Home" asp-action="Index">Inicio</a>
+                            <a class="text-secondary hover:bg-surface-variant transition-all px-2 py-1" href="#">Propietarios</a>
+                            <a class="text-secondary hover:bg-surface-variant transition-all px-2 py-1" href="#">Mascotas</a>
+                            <a class="text-secondary hover:bg-surface-variant transition-all px-2 py-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Appointments" ? "text-primary border-b-2 border-primary font-semibold" : "")" asp-controller="Appointments" asp-action="Index">Citas</a>
+                        </nav>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-2 border-l border-outline-variant pl-4">
+                            <span class="text-sm font-semibold text-secondary">@User.Identity.Name</span>
+                            <a class="material-symbols-outlined text-secondary hover:text-error transition-colors p-1" title="Cerrar Sesión" asp-controller="Account" asp-action="Logout">logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex flex-1 overflow-hidden">
+                <!-- SideNavBar (Shared Component) -->
+                <aside class="hidden md:flex flex-col h-full py-6 bg-surface-container-low border-r border-outline-variant w-64 shadow-inner">
+                    <div class="px-6 mb-8">
+                        <h2 class="text-lg font-bold text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">medical_services</span>
+                            <span>Sede Principal</span>
+                        </h2>
+                        <p class="text-[12px] text-secondary">Control de Gestión • 2026</p>
+                    </div>
+                    <nav class="flex-1 px-3 space-y-2">
+                        <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all-200 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "bg-surface-container-high text-primary font-semibold" : "")" asp-controller="Home" asp-action="Index">
+                            <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                            <span class="font-body text-[14px]">Inicio</span>
+                        </a>
+                        <div class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all-200">
+                            <span class="material-symbols-outlined text-[20px]">group</span>
+                            <span class="font-body text-[14px]">Propietarios</span>
+                        </div>
+                        <div class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all-200">
+                            <span class="material-symbols-outlined text-[20px]">pets</span>
+                            <span class="font-body text-[14px]">Mascotas</span>
+                        </div>
+                        <a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high cursor-pointer transition-all-200 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Appointments" ? "bg-surface-container-high text-primary font-semibold" : "")" asp-controller="Appointments" asp-action="Index">
+                            <span class="material-symbols-outlined text-[20px]">event</span>
+                            <span class="font-body text-[14px]">Citas Médicas</span>
+                        </a>
+                    </nav>
+                    <div class="px-4 mt-auto border-t border-outline-variant pt-4">
+                        <p class="text-center text-[11px] text-secondary">VetCorp Management v1.0.0</p>
+                    </div>
+                </aside>
+
+                <!-- Main Content Area -->
+                <main class="flex-1 flex flex-col overflow-y-auto bg-surface">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- RENDER ANONYMOUS CONTENT (LOGIN) -->
+        <main role="main" class="w-full">
+            @RenderBody()
+        </main>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
